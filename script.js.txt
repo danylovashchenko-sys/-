@@ -1,0 +1,104 @@
+const canvas = document.getElementById("space");
+const ctx = canvas.getContext("2d");
+const infoBox = document.getElementById("infoBox");
+const startButton = document.getElementById("startButton");
+const clickSound = document.getElementById("clickSound");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const sun = { x: canvas.width / 2, y: canvas.height / 2, r: 50, color: "yellow" };
+const planets = [
+  { name: "Меркурій", orbit: 100, size: 8, color: "#888", speed: 0.03 },
+  { name: "Венера", orbit: 150, size: 12, color: "#d4a15c", speed: 0.02 },
+  { name: "Земля", orbit: 200, size: 14, color: "#3c7aff", speed: 0.015 },
+  { name: "Марс", orbit: 250, size: 10, color: "#e35b3b", speed: 0.012 },
+];
+
+let angle = 0;
+let hoveredPlanet = null;
+let isStarted = false;
+
+function drawScene() {
+  if (!isStarted) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Сонце
+  ctx.beginPath();
+  ctx.arc(sun.x, sun.y, sun.r, 0, Math.PI * 2);
+  ctx.fillStyle = sun.color;
+  ctx.shadowColor = "yellow";
+  ctx.shadowBlur = 30;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  planets.forEach((p) => {
+    const x = sun.x + Math.cos(angle * p.speed) * p.orbit;
+    const y = sun.y + Math.sin(angle * p.speed) * p.orbit;
+    p.x = x;
+    p.y = y;
+
+    ctx.beginPath();
+    ctx.arc(sun.x, sun.y, p.orbit, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(255,255,255,0.1)";
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(x, y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = hoveredPlanet === p ? "white" : p.color;
+    ctx.fill();
+  });
+
+  angle += 1;
+  requestAnimationFrame(drawScene);
+}
+
+canvas.addEventListener("mousemove", (e) => {
+  if (!isStarted) return;
+  const { offsetX, offsetY } = e;
+  hoveredPlanet = null;
+  planets.forEach((p) => {
+    const dx = offsetX - p.x;
+    const dy = offsetY - p.y;
+    if (Math.sqrt(dx * dx + dy * dy) < p.size + 3) hoveredPlanet = p;
+  });
+  canvas.style.cursor = hoveredPlanet ? "pointer" : "default";
+});
+
+canvas.addEventListener("click", () => {
+  if (!isStarted) return;
+  if (hoveredPlanet) {
+    clickSound.currentTime = 0;
+    clickSound.play();
+    infoBox.innerHTML = `
+      <strong>${hoveredPlanet.name}</strong><br>
+      Орбіта: ${hoveredPlanet.orbit} млн км<br>
+      Розмір: ${hoveredPlanet.size * 1000} км<br>
+      Колір: ${hoveredPlanet.color}
+    `;
+    infoBox.style.display = "block";
+  } else {
+    infoBox.style.display = "none";
+  }
+});
+
+startButton.addEventListener("click", () => {
+  startButton.style.display = "none";
+  isStarted = true;
+  fadeInCanvas();
+  drawScene();
+});
+
+function fadeInCanvas() {
+  let opacity = 0;
+  const fade = setInterval(() => {
+    opacity += 0.05;
+    canvas.style.opacity = opacity;
+    if (opacity >= 1) clearInterval(fade);
+  }, 100);
+}
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});

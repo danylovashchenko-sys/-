@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Мандрівка космосом</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="space"></canvas>
+  <div id="infoBox"></div>
+  <button id="startButton">🚀 Почати мандрівку</button>
+
+  <audio id="clickSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_d6651c8f19.mp3?filename=click-124467.mp3"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
